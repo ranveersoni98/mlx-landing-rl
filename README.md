@@ -1,7 +1,5 @@
 # mlx-landing-rl
 
-**Teach a little rocket to land itself**
-
 > Released weights: **[RanveerSoni98/mlx-landing-rl](https://huggingface.co/RanveerSoni98/mlx-landing-rl)**
 
 ![Python](https://img.shields.io/badge/python-3.12-blue)
