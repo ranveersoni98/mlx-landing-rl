@@ -1,0 +1,62 @@
+[project]
+name = "mlx-landing-rl"
+version = "0.1.0"
+description = "Teach a rocket to land itself"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+authors = [
+    { name = "Ranveer Soni", email = "git@ranveersoni.me" }
+]
+maintainers = [
+    { name = "Ranveer Soni", email = "git@ranveersoni.me" }
+]
+keywords = ["reinforcement-learning", "ppo", "mlx", "lunarlander", "apple-silicon"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "gymnasium[box2d]>=1.4.0",
+    "huggingface-hub>=0.34.0",
+    "mlx>=0.32.4",
+    "numpy>=2.5.4",
+]
+
+[project.urls]
+Homepage = "https://github.com/RanveerSoni98/mlx-landing-rl"
+Repository = "https://github.com/RanveerSoni98/mlx-landing-rl"
+Issues = "https://github.com/RanveerSoni98/mlx-landing-rl/issues"
+Model = "https://huggingface.co/RanveerSoni98/mlx-landing-rl"
+
+[project.scripts]
+train-lander = "mlx_landing_rl.cli:train_main"
+eval-lander = "mlx_landing_rl.cli:eval_main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0.0",
+    "ruff>=0.14.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.13.0,<0.14.0"]
+build-backend = "uv_build"
+
+[tool.uv_build]
+module-name = "mlx_landing_rl"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

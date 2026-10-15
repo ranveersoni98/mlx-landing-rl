@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+.env/
+
+# Installers / lock artifacts (keep uv.lock, ignore the rest)
+pip-wheel-metadata/
+
+# Testing / linting
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Agents / local notes (personal scratch, not part of the release)
+.agents/
+
+# Checkpoints: never commit weights — they live on Hugging Face.
+# Keep this folder for local training output only.
+checkpoints/*
+
+# HF staging dir (built at release time, don't commit)
+dist/
