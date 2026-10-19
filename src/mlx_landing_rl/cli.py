@@ -30,6 +30,11 @@ def train_main() -> None:
         default="checkpoints/lunar_ppo.npz",
         help="where the best checkpoint goes (_final is auto-added)",
     )
+    p.add_argument(
+        "--resume",
+        action="store_true",
+        help="start from the weights in --save instead of from scratch",
+    )
     p.add_argument("--env", type=str, default="LunarLander-v3", help="gym env id")
     args = p.parse_args()
     train(
@@ -39,6 +44,7 @@ def train_main() -> None:
         seed=args.seed,
         save_path=args.save,
         env_id=args.env,
+        resume=args.resume,
     )
 
 
@@ -59,5 +65,23 @@ def eval_main() -> None:
         help="use argmax instead of sampling (usually crashes more!)",
     )
     p.add_argument("--env", type=str, default="LunarLander-v3", help="gym env id")
+    p.add_argument(
+        "--record",
+        type=str,
+        default=None,
+        metavar="PATH",
+        help="also save an animated GIF of the flight(s) to PATH (e.g. lander.gif)",
+    )
+    p.add_argument(
+        "--record-episodes",
+        type=int,
+        default=1,
+        metavar="N",
+        help="episodes to include in the GIF (default 1 — keep it bite-size)",
+    )
     args = p.parse_args()
     evaluate(args.weights, args.episodes, args.render, args.greedy, env_id=args.env)
+    if args.record:
+        from .evaluation import record
+
+        record(args.weights, args.record, args.record_episodes, args.greedy, env_id=args.env)
