@@ -11,6 +11,7 @@ A full 500k-step run is ~244 updates and takes 10-15 minutes on Apple Silicon.
 
 from __future__ import annotations
 
+import math
 import os
 import time
 
@@ -36,8 +37,9 @@ def train(
     save_path: str = "checkpoints/lunar_ppo.npz",
     log_every: int = 1,
     env_id: str = "LunarLander-v3",
+    resume: bool = False,
 ) -> str:
-    """Train the lander from scratch. Returns the best-checkpoint path."""
+    """Train the lander. With `resume=True`, warm-starts from `save_path`."""
     cfg = TrainConfig(
         total_timesteps=total_timesteps,
         rollout_steps=rollout_steps,
@@ -46,10 +48,10 @@ def train(
         env_id=env_id,
         save_path=save_path,
     )
-    return train_from_config(cfg, log_every=log_every)
+    return train_from_config(cfg, log_every=log_every, resume=resume)
 
 
-def train_from_config(cfg: TrainConfig, log_every: int = 1) -> str:
+def train_from_config(cfg: TrainConfig, log_every: int = 1, resume: bool = False) -> str:
     """Same as `train()`, but takes a `TrainConfig` — handy for sweeps."""
     seed_all(cfg.seed)
 
@@ -60,7 +62,23 @@ def train_from_config(cfg: TrainConfig, log_every: int = 1) -> str:
         hidden=cfg.model.hidden,
     )
     mx.eval(model.parameters())
-    optimizer = optim.Adam(learning_rate=cfg.lr)
+
+    if resume:
+        # `load` prints a friendly note and returns False if there's no file,
+        # so resuming with an empty folder just quietly starts from scratch.
+        from ..utils import load
+
+        if load(model, cfg.save_path):
+            print(f"resuming from {cfg.save_path}")
+
+    # Standard PPO practice: anneal the learning rate to 0 across the run.
+    # Early updates make big adjustments; late ones are gentle pruning so the
+    # policy settles instead of wobbling around the optimum.
+    num_updates = cfg.total_timesteps // cfg.rollout_steps
+    batches_per_update = cfg.ppo.epochs * math.ceil(cfg.rollout_steps / cfg.ppo.batch_size)
+    total_opt_steps = max(num_updates * batches_per_update, 1)
+    lr_schedule = optim.linear_schedule(cfg.lr, 0.0, steps=total_opt_steps)
+    optimizer = optim.Adam(learning_rate=lr_schedule)
 
     os.makedirs(os.path.dirname(cfg.save_path) or ".", exist_ok=True)
 
