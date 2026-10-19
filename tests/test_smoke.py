@@ -1,6 +1,7 @@
 """Smoke tests — fast checks that nothing broke during the refactor."""
 
 import numpy as np
+import pytest
 
 
 def test_model_forward():
@@ -42,6 +43,32 @@ def test_gae_shapes():
     assert adv.shape == (T,)
     assert ret.shape == (T,)
     assert np.all(np.isfinite(adv))
+
+
+def test_seed_all_makes_sampling_repeatable():
+    from mlx_landing_rl import ActorCritic
+    from mlx_landing_rl.utils import seed_all
+
+    model = ActorCritic()
+    obs = np.zeros(8, dtype=np.float32)
+
+    seed_all(7)
+    a1 = model.act(obs)[0]
+    seed_all(7)
+    a2 = model.act(obs)[0]
+
+    assert a1 == a2, "same seed should give the same sampled action"
+
+
+def test_record_writes_gif(tmp_path):
+    pytest.importorskip("imageio")
+
+    from mlx_landing_rl.evaluation import record
+
+    out = tmp_path / "flight.gif"
+    path = record(weights="", path=str(out), episodes=1)  # "" = random pilot
+    assert path == str(out)
+    assert out.stat().st_size > 0
 
 
 def test_checkpoint_roundtrip(tmp_path):
