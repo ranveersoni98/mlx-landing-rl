@@ -1,6 +1,6 @@
 [project]
 name = "mlx-landing-rl"
-version = "0.1.0"
+version = "0.2.0"
 description = "Teach a rocket to land itself"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -24,6 +24,7 @@ classifiers = [
 dependencies = [
     "gymnasium[box2d]>=1.4.0",
     "huggingface-hub>=0.34.0",
+    "imageio[pillow]>=2.34",
     "mlx>=0.32.4",
     "numpy>=2.5.4",
 ]
