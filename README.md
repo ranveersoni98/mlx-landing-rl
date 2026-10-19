@@ -34,7 +34,10 @@ uv run eval-lander --episodes 5
 # 3. Actually watch it — opens a window, very satisfying
 uv run eval-lander --episodes 3 --render
 
-# 4. Or run the tiny demo script
+# 4. Make a GIF of the landing for your README / PR / group chat
+uv run eval-lander --episodes 1 --record lander.gif
+
+# 5. Or run the tiny demo script
 uv run python examples/quickstart.py
 ```
 
@@ -56,6 +59,9 @@ uv run train-lander --timesteps 4096 --rollout 1024 --save checkpoints/smoke.npz
 
 # The real thing (~10-15 min on M1/M2/M3/M4, ~500k steps)
 uv run train-lander --timesteps 500000
+
+# The computer slept / you got bored / the run was too short? Pick up from the best checkpoint:
+uv run train-lander --timesteps 500000 --resume
 
 # Then evaluate your new pilot
 uv run eval-lander --weights checkpoints/lunar_ppo.npz --episodes 10
@@ -81,7 +87,9 @@ Files that do each part, in plain English:
 | Watching | `src/mlx_landing_rl/evaluation/evaluate.py` | Fly episodes, print LAND or crash |
 | Knobs | `src/mlx_landing_rl/config.py` | Every hyperparameter in one dataclass |
 
-Default hyperparameters (the boring ones that just work): `γ=0.99, λ=0.95, clip=0.2, lr=3e-4, 4 epochs, batch 64, entropy 0.01, value loss 0.5`.
+Default hyperparameters (the boring ones that just work): `γ=0.99, λ=0.95, clip=0.2, lr=3e-4 (annealed linearly to 0), 4 epochs, batch 64, entropy 0.01, value loss 0.5`.
+
+Reproducibility: Python, NumPy and MLX's sampler are all seeded at run start (`seed_all`, seed 0 by default) so a run can be replayed.
 
 ## Project layout
 
@@ -100,13 +108,16 @@ mlx-landing-rl/
 │   │   ├── ppo.py               # the PPO update
 │   │   └── trainer.py           # the fly-learn-repeat loop
 │   ├── evaluation/
-│   │   └── evaluate.py          # watch it fly
+│   │   ├── evaluate.py          # fly episodes, print LAND or crash
+│   │   └── record.py            # same, but saves an animated GIF
 │   └── utils/
 │       ├── checkpoint.py        # save / load weights
 │       └── seeding.py           # reproducibility
 ├── checkpoints/
 │   ├── lunar_ppo.npz            # best pilot (release weights)
 │   └── lunar_ppo_final.npz      # last pilot (for comparison)
+├── docs/
+│   └── lander.gif               # a real landing, recorded with --record
 ├── examples/
 │   ├── quickstart.py            # fly one episode in 10 lines
 │   └── watch.py                 # open a window, enjoy
@@ -144,7 +155,13 @@ mx.eval(model.parameters())
 
 ## Results
 
-Trained for 500k steps on Apple Silicon, seed 0:
+Trained for 500k steps on Apple Silicon, seed 0. A recent flight, as GIF:
+
+<br/>
+
+<p align="center">
+  <img src="docs/lander.gif" alt="learned pilot sticking a landing" width="420"/>
+</p>
 
 | Checkpoint | Mean (5 eps, sampling) | Solved rate | Notes |
 |------------|----------------------|-------------|-------|
